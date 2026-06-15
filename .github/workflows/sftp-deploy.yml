@@ -1,0 +1,16 @@
+on: [push]
+
+jobs:
+  deploy_job:
+    runs-on: ubuntu-latest
+    name: Deploy Files
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Deploy to Server
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.6
+        with:
+          username: 'root'
+          server: 'https://net-gazetteer.ru/'
+          remote_path: '/home/f1176550/domains/net-gazetteer.ru/public_html/'
+          sftpArgs: '-o ConnectTimeout=5'
