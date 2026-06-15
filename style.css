@@ -1,0 +1,125 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif; /* Простая, читаемая гарнитура */
+            background-color: #ffffff; /* Белый фон */
+            color: #333; /* Основной цвет текста */
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #2f2682; /* Темно-синий фон шапки */
+            color: white; /* Белый текст */
+            padding: 1rem 2rem; /* Отступы внутри */
+            position: sticky; /* "Липкая" шапка */
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Легкая тень */
+        }
+
+        .header-content {
+            max-width: 1200px; /* Максимальная ширина содержимого */
+            margin: 0 auto; /* Центрирование */
+            display: flex;
+            justify-content: space-between; /* Распределение по краям */
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 1.8rem; /* Размер заголовка */
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none; /* Убираем маркеры списка */
+            display: flex; /* Горизонтальное расположение */
+        }
+
+        nav li {
+            margin-left: 1.5rem; /* Отступ между пунктами */
+        }
+
+        nav a {
+            color: white; /* Цвет ссылок */
+            text-decoration: none; /* Убираем подчеркивание */
+            font-weight: 500;
+            transition: color 0.3s ease; /* Плавный переход цвета */
+        }
+
+        nav a:hover {
+            color: #4eb543; /* Зелёный при наведении */
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem;
+            background-color: #f9f9f9; /* Светло-серый фон для героя */
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .hero h2 {
+            color: #2f2682; /* Синий заголовок */
+            margin-bottom: 1rem;
+            font-size: 2.2rem;
+        }
+
+        .hero p {
+            color: #555; /* Более светлый серый для описания */
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Адаптивная сетка */
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background-color: white; /* Белая карточка */
+            border: 1px solid #eee; /* Светлая граница */
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Легкая тень */
+            transition: transform 0.2s ease, box-shadow 0.2s ease; /* Эффект при наведении */
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h3 {
+            color: #4eb543; /* Зелёный заголовок карточки */
+            margin-bottom: 0.8rem;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p {
+            color: #666;
+        }
+
+        footer {
+            background-color: #2f2682; /* Темно-синий фон футера */
+            color: white;
+            text-align: center;
+            padding: 1.5rem 2rem;
+            margin-top: 3rem; /* Отступ сверху */
+        }
+
+        .footer-content p {
+            margin: 0.3rem 0;
+        }
