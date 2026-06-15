@@ -123,3 +123,8 @@
         .footer-content p {
             margin: 0.3rem 0;
         }
+header h1 a {
+    text-decoration: none;
+    color: inherit;
+    /* Убедись, что у img внутри a нет своих стилей, добавляющих рамки или подчёркивания */
+}
