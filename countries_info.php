@@ -1,3 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+ <head>
+  <meta charset="UTF-8">
+  <title>Веб-справочник по географии</title>
+  <link rel="stylesheet" href="style.css">
+ </head>
+ <body>
+    <header>
+        <div class="header-content">
+            <h1>🌍 NetGazetteer</h1>
+            <nav>
+                <ul>
+                    <li><a href="#home">Главная</a></li>
+                    <li><a href="#countries">Страны</a></li>
+                    <li><a href="#about">О проекте</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
 <?php
 
 function fetchCountryIdsFromWikidata() {
@@ -73,3 +94,12 @@ catch (Exception $e) {
 }
 
   ?>
+  </main>
+
+  <footer>
+        <div class="footer-content">
+            <p>Данные предоставлены из Wikidata.</p>
+        </div>
+    </footer>
+ </body>
+</html>
