@@ -10,7 +10,7 @@ jobs:
       - name: Deploy to Server
         uses: wlixcc/SFTP-Deploy-Action@v1.2.6
         with:
-          username: 'root'
-          server: 'https://net-gazetteer.ru/'
+          username: 'f1176550'
+          server: ${{ secrets.SERVER_IP }}
           remote_path: '/home/f1176550/domains/net-gazetteer.ru/public_html/'
           sftpArgs: '-o ConnectTimeout=5'
