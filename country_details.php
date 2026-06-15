@@ -304,8 +304,8 @@ if (isset($claims['P691']) && !empty($claims['P691'])) {
     }
 }
 
-echo "<a href='index.php'>← Назад к списку стран</a>";
-echo "<h1>Детали: $label ($qid)</h1>";
+echo "<a href='countries_list.php'>← Назад к списку стран</a>";
+echo "<h1>Детали: $label</h1>";
 echo "<p><strong>Описание:</strong> $description</p>";
 echo "<p><strong>Население:</strong> $population" . ($populationDate ? " (по состоянию на $populationDate)" : "") . "</p>";
 echo "<p><strong>Площадь:</strong> $area</p>";
