@@ -201,10 +201,104 @@ if (isset($claims['P150']) && !empty($claims['P150'])) {
     }
 }
 
+// --- ГЛАВА ГОСУДАРСТВА (P35) - поиск текущего ---
 $headOfState = 'Не указан';
+if (isset($claims['P35']) && !empty($claims['P35'])) {
+    $currentTime = time();
+
+    foreach ($claims['P35'] as $claim) {
+        $startDate = null;
+        $endDate = null;
+
+        // Извлекаем дату начала (P580)
+        if (isset($claim['qualifiers']['P580']) && !empty($claim['qualifiers']['P580'])) {
+            $startSnak = $claim['qualifiers']['P580'][0];
+            if ($startSnak['datatype'] === 'time' && isset($startSnak['datavalue']['value']['time'])) {
+                $timeString = $startSnak['datavalue']['value']['time'];
+                $year = (int)substr($timeString, 1, 4);
+                $month = (int)substr($timeString, 6, 2);
+                $day = (int)substr($timeString, 9, 2);
+
+                if ($month === 0 && $day === 0) {
+                    $startDate = mktime(0, 0, 0, 1, 1, $year);
+                } elseif ($day === 0) {
+                    $startDate = mktime(0, 0, 0, $month, 1, $year);
+                } else {
+                    $startDate = mktime(0, 0, 0, $month, $day, $year);
+                }
+            }
+        }
+
+        // Извлекаем дату окончания (P582)
+        if (isset($claim['qualifiers']['P582']) && !empty($claim['qualifiers']['P582'])) {
+            $endSnak = $claim['qualifiers']['P582'][0];
+            if ($endSnak['datatype'] === 'time' && isset($endSnak['datavalue']['value']['time'])) {
+                $timeString = $endSnak['datavalue']['value']['time'];
+                $year = (int)substr($timeString, 1, 4);
+                $month = (int)substr($timeString, 6, 2);
+                $day = (int)substr($timeString, 9, 2);
+
+                if ($month === 0 && $day === 0) {
+                    $endDate = mktime(0, 0, 0, 1, 1, $year);
+                } elseif ($day === 0) {
+                    $endDate = mktime(0, 0, 0, $month, 1, $year);
+                } else {
+                    $endDate = mktime(0, 0, 0, $month, $day, $year);
+                }
+            }
+        }
+
+        // Проверяем, действует ли этот лидер сейчас
+        $isCurrent = false;
+        if ($startDate !== null && $startDate <= $currentTime) {
+            if ($endDate === null || $endDate > $currentTime) {
+                $isCurrent = true;
+            }
+        }
+
+        if ($isCurrent && isset($claim['mainsnak']['datavalue']['value']['id'])) {
+            $headQid = $claim['mainsnak']['datavalue']['value']['id'];
+
+            // --- НАЧАЛО: Получение имени текущего главы государства ---
+            $headLabel = $headQid;
+            $headApiUrl = 'https://www.wikidata.org/w/api.php';
+            $headParams = [
+                'action' => 'wbgetentities',
+                'ids' => $headQid,
+                'format' => 'json',
+                'languages' => 'ru,en',
+                'props' => 'labels'
+            ];
+            $headUrl = $headApiUrl . '?' . http_build_query($headParams);
+
+            $headCh = curl_init();
+            curl_setopt($headCh, CURLOPT_URL, $headUrl);
+            curl_setopt($headCh, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($headCh, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($headCh, CURLOPT_USERAGENT, 'MyWikipediaApp/0.1 (https://example.com/contact)');
+            $headResponse = curl_exec($headCh);
+            $headHttpCode = curl_getinfo($headCh, CURLINFO_HTTP_CODE);
+            curl_close($headCh);
+
+            if ($headHttpCode === 200) {
+                $headData = json_decode($headResponse, true);
+                if (isset($headData['entities'][$headQid]['labels']['ru']['value'])) {
+                    $headLabel = $headData['entities'][$headQid]['labels']['ru']['value'];
+                } elseif (isset($headData['entities'][$headQid]['labels']['en']['value'])) {
+                     $headLabel = $headData['entities'][$headQid]['labels']['en']['value'];
+                }
+            }
+            $headOfState = $headLabel;
+            // --- КОНЕЦ: Получение имени текущего главы государства ---
+            break; // Нашли текущего, выходим из цикла
+        }
+    }
+}
+
+// --- ГЛАВА ПРАВИТЕЛЬСТВА (P6) - поиск текущего ---
+$headOfGovernment = 'Не указан';
 if (isset($claims['P6']) && !empty($claims['P6'])) {
     $currentTime = time();
-    $potentialCurrentHeads = []; // Массив для потенциальных кандидатов
 
     foreach ($claims['P6'] as $claim) {
         $startDate = null;
@@ -249,26 +343,17 @@ if (isset($claims['P6']) && !empty($claims['P6'])) {
         }
 
         // Проверяем, действует ли этот лидер сейчас
+        $isCurrent = false;
         if ($startDate !== null && $startDate <= $currentTime) {
             if ($endDate === null || $endDate > $currentTime) {
-                // Добавляем в список потенциальных текущих лидеров
-                $potentialCurrentHeads[] = $claim;
+                $isCurrent = true;
             }
         }
-        // Также добавим утверждения без дат как потенциальные (если других нет)
-        if ($startDate === null && $endDate === null && isset($claim['mainsnak']['datavalue']['value']['id'])) {
-             $potentialCurrentHeads[] = $claim;
-        }
-    }
 
-    // Выбираем первого из потенциальных текущих (обычно Wikidata упорядочивает актуальные первыми или по дате)
-    if (!empty($potentialCurrentHeads)) {
-        $currentHeadClaim = $potentialCurrentHeads[0]; // Берём первый подходящий
+        if ($isCurrent && isset($claim['mainsnak']['datavalue']['value']['id'])) {
+            $headQid = $claim['mainsnak']['datavalue']['value']['id'];
 
-        if (isset($currentHeadClaim['mainsnak']['datavalue']['value']['id'])) {
-            $headQid = $currentHeadClaim['mainsnak']['datavalue']['value']['id'];
-
-            // --- НАЧАЛО: Получение имени текущего главы ---
+            // --- НАЧАЛО: Получение имени текущего главы правительства ---
             $headLabel = $headQid;
             $headApiUrl = 'https://www.wikidata.org/w/api.php';
             $headParams = [
@@ -297,96 +382,11 @@ if (isset($claims['P6']) && !empty($claims['P6'])) {
                      $headLabel = $headData['entities'][$headQid]['labels']['en']['value'];
                 }
             }
-            $headOfState = $headLabel;
-            // --- КОНЕЦ: Получение имени текущего главы ---
+            $headOfGovernment = $headLabel;
+            // --- КОНЕЦ: Получение имени текущего главы правительства ---
+            break; // Нашли текущего, выходим из цикла
         }
     }
-}
-
-// --- ГЛАВА ПРАВИТЕЛЬСТВА (P691, P742) - поиск текущего ---
-$headOfGovernment = 'Не указан';
-$potentialGovHeadQid = null;
-
-// Функция для извлечения даты из квалификатора (унифицированная)
-function extractDateFromQualifier($qualifierArray, $timeKey) {
-    if (isset($qualifierArray[$timeKey]) && !empty($qualifierArray[$timeKey])) {
-        $snak = $qualifierArray[$timeKey][0];
-        if ($snak['datatype'] === 'time' && isset($snak['datavalue']['value']['time'])) {
-            $timeString = $snak['datavalue']['value']['time'];
-            $year = (int)substr($timeString, 1, 4);
-            $month = (int)substr($timeString, 6, 2);
-            $day = (int)substr($timeString, 9, 2);
-
-            if ($month === 0 && $day === 0) {
-                return mktime(0, 0, 0, 1, 1, $year);
-            } elseif ($day === 0) {
-                return mktime(0, 0, 0, $month, 1, $year);
-            } else {
-                return mktime(0, 0, 0, $month, $day, $year);
-            }
-        }
-    }
-    return null;
-}
-
-// Проверяем P691 (премьер-министр/канцлер/...) и P742 (премьер-министр) по очереди
-foreach (['P691', 'P742'] as $govHeadPropId) {
-    if (isset($claims[$govHeadPropId]) && !empty($claims[$govHeadPropId]) && !$potentialGovHeadQid) {
-        $currentTime = time();
-
-        foreach ($claims[$govHeadPropId] as $claim) {
-            $startDate = extractDateFromQualifier($claim['qualifiers'] ?? [], 'P580');
-            $endDate = extractDateFromQualifier($claim['qualifiers'] ?? [], 'P582');
-
-            $isCurrent = false;
-            if ($startDate !== null && $startDate <= $currentTime) {
-                if ($endDate === null || $endDate > $currentTime) {
-                    $isCurrent = true;
-                }
-            }
-
-            if ($isCurrent && isset($claim['mainsnak']['datavalue']['value']['id'])) {
-                $potentialGovHeadQid = $claim['mainsnak']['datavalue']['value']['id'];
-                break; // Нашли текущего, выходим из внутреннего цикла
-            }
-        }
-    }
-    if ($potentialGovHeadQid) {
-        break; // Нашли по одному из свойств, выходим из внешнего цикла
-    }
-}
-
-// Если нашли QID, получаем имя
-if ($potentialGovHeadQid) {
-    $govHeadLabel = $potentialGovHeadQid;
-    $govHeadApiUrl = 'https://www.wikidata.org/w/api.php';
-    $govHeadParams = [
-        'action' => 'wbgetentities',
-        'ids' => $potentialGovHeadQid,
-        'format' => 'json',
-        'languages' => 'ru,en',
-        'props' => 'labels'
-    ];
-    $govHeadUrl = $govHeadApiUrl . '?' . http_build_query($govHeadParams);
-
-    $govHeadCh = curl_init();
-    curl_setopt($govHeadCh, CURLOPT_URL, $govHeadUrl);
-    curl_setopt($govHeadCh, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($govHeadCh, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($govHeadCh, CURLOPT_USERAGENT, 'MyWikipediaApp/0.1 (https://example.com/contact)');
-    $govHeadResponse = curl_exec($govHeadCh);
-    $govHeadHttpCode = curl_getinfo($govHeadCh, CURLINFO_HTTP_CODE);
-    curl_close($govHeadCh);
-
-    if ($govHeadHttpCode === 200) {
-        $govHeadData = json_decode($govHeadResponse, true);
-        if (isset($govHeadData['entities'][$potentialGovHeadQid]['labels']['ru']['value'])) {
-            $govHeadLabel = $govHeadData['entities'][$potentialGovHeadQid]['labels']['ru']['value'];
-        } elseif (isset($govHeadData['entities'][$potentialGovHeadQid]['labels']['en']['value'])) {
-             $govHeadLabel = $govHeadData['entities'][$potentialGovHeadQid]['labels']['en']['value'];
-        }
-    }
-    $headOfGovernment = $govHeadLabel;
 }
 
 echo "<a href='countries_list.php'>← Назад к списку стран</a>";
