@@ -109,7 +109,7 @@ foreach ($uniqueCountries as $country) {
     $qid = htmlspecialchars($country['qid'], ENT_QUOTES, 'UTF-8');
 
     $link = "country_details.php?country_qid=" . urlencode($qid);
-    echo "<li><a href='$link'>$label</a> ($qid)</li>";
+    echo "<li><a href='$link'>$label</a></li>";
 }
 echo "</ul>";
 

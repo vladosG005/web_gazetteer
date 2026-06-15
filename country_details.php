@@ -76,7 +76,7 @@ if (isset($claims['P1082']) && !empty($claims['P1082'])) {
         foreach ($popClaim['qualifiers']['P585'] ?? [] as $qualifier) {
             if ($qualifier['datavalue']['type'] === 'time') {
                 $dateStr = $qualifier['datavalue']['value']['time'];
-                $populationDate = substr($dateStr, 1, 11);
+                $populationDate = substr($dateStr, 1, 10);
                 break;
             }
         }
