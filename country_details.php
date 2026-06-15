@@ -76,7 +76,19 @@ if (isset($claims['P1082']) && !empty($claims['P1082'])) {
         foreach ($popClaim['qualifiers']['P585'] ?? [] as $qualifier) {
             if ($qualifier['datavalue']['type'] === 'time') {
                 $dateStr = $qualifier['datavalue']['value']['time'];
-                $populationDate = substr($dateStr, 1, 10);
+                $year = substr($dateStr, 1, 4);
+                $month = substr($dateStr, 6, 2);
+                $day = substr($dateStr, 9, 2);
+
+                if ($month === '00' && $day === '00') {
+                    $populationDate = $year;
+                }
+                elseif ($day === '00') {
+                    $populationDate = "$year-$month";
+                }
+                else {
+                    $populationDate = "$year-$month-$day";
+                }
                 break;
             }
         }
