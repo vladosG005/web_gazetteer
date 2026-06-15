@@ -9,7 +9,7 @@
  <body>
     <header>
         <div class="header-content">
-            <h1>🌍 NetGazetteer</h1>
+            <h1><a href="index.html">🌍 NetGazetteer</a></h1>
             <nav>
                 <ul>
                     <li><a href="index.html">Главная</a></li>
