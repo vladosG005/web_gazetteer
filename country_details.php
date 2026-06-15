@@ -203,7 +203,8 @@ if (isset($claims['P150']) && !empty($claims['P150'])) {
 
 $headOfState = 'Не указан';
 if (isset($claims['P6']) && !empty($claims['P6'])) {
-    $currentTime = time(); // Текущее время в Unix timestamp
+    $currentTime = time();
+    $potentialCurrentHeads = []; // Массив для потенциальных кандидатов
 
     foreach ($claims['P6'] as $claim) {
         $startDate = null;
@@ -248,18 +249,27 @@ if (isset($claims['P6']) && !empty($claims['P6'])) {
         }
 
         // Проверяем, действует ли этот лидер сейчас
-        $isCurrent = false;
         if ($startDate !== null && $startDate <= $currentTime) {
             if ($endDate === null || $endDate > $currentTime) {
-                $isCurrent = true;
+                // Добавляем в список потенциальных текущих лидеров
+                $potentialCurrentHeads[] = $claim;
             }
         }
+        // Также добавим утверждения без дат как потенциальные (если других нет)
+        if ($startDate === null && $endDate === null && isset($claim['mainsnak']['datavalue']['value']['id'])) {
+             $potentialCurrentHeads[] = $claim;
+        }
+    }
 
-        if ($isCurrent && isset($claim['mainsnak']['datavalue']['value']['id'])) {
-            $headQid = $claim['mainsnak']['datavalue']['value']['id'];
+    // Выбираем первого из потенциальных текущих (обычно Wikidata упорядочивает актуальные первыми или по дате)
+    if (!empty($potentialCurrentHeads)) {
+        $currentHeadClaim = $potentialCurrentHeads[0]; // Берём первый подходящий
+
+        if (isset($currentHeadClaim['mainsnak']['datavalue']['value']['id'])) {
+            $headQid = $currentHeadClaim['mainsnak']['datavalue']['value']['id'];
 
             // --- НАЧАЛО: Получение имени текущего главы ---
-            $headLabel = $headQid; // Значение по умолчанию
+            $headLabel = $headQid;
             $headApiUrl = 'https://www.wikidata.org/w/api.php';
             $headParams = [
                 'action' => 'wbgetentities',
@@ -289,7 +299,6 @@ if (isset($claims['P6']) && !empty($claims['P6'])) {
             }
             $headOfState = $headLabel;
             // --- КОНЕЦ: Получение имени текущего главы ---
-            break; // Нашли текущего, выходим из цикла
         }
     }
 }
