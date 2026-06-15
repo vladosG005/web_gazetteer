@@ -90,7 +90,7 @@ try {
     $allCountries = fetchCountryIdsFromWikidata();
 echo '<pre>';
     foreach ($allCountries as $index => $country) {
-            echo "{$country['qid']}, {$country['label'], $country['capital']}\n";
+            echo "{$country['qid']}, {$country['label']}, {$country['capital']}\n";
     }
 echo '</pre>';
 }
