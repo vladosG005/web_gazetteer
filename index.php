@@ -72,12 +72,10 @@ try {
 
     echo "Найдено " . count($allCountries) . " стран:\n";
     foreach ($allCountries as $index => $country) {
-            echo "{$country['qid']}\n";
+            echo "{$country['qid']}, {$country['label']}\n";
     }
-
-
-
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     echo "Произошла ошибка: " . $e->getMessage() . "\n";
 }
 
