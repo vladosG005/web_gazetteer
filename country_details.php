@@ -158,11 +158,162 @@ if (isset($claims['P36']) && !empty($claims['P36'])) {
     }
 }
 
-echo "<a href='countries_list.php'>← Назад к списку стран</a>";
-echo "<h1>Детали: $label</h1>";
+$area = 'Не указана';
+$areaUnit = 'км²';
+if (isset($claims['P2046']) && !empty($claims['P2046'])) {
+    $areaClaim = $claims['P2046'][0]; // Берём первое значение
+    if (isset($areaClaim['mainsnak']['datavalue']['value']['amount'])) {
+        $rawArea = ltrim($areaClaim['mainsnak']['datavalue']['value']['amount'], '+');
+        $unitUri = $areaClaim['mainsnak']['datavalue']['value']['unit'];
+        $area = number_format((float)$rawArea, 2, '.', ' ') . ' ' . $areaUnit; // Форматируем с 2 знаками после запятой
+    }
+}
+
+$gdpPerCapita = 'Не указан';
+$gdpCurrency = '$';
+if (isset($claims['P2132']) && !empty($claims['P2132'])) {
+    $gdpClaim = $claims['P2132'][0]; // Берём первое значение
+    if (isset($gdpClaim['mainsnak']['datavalue']['value']['amount'])) {
+        $rawGdp = ltrim($gdpClaim['mainsnak']['datavalue']['value']['amount'], '+');
+        $gdpPerCapita = $gdpCurrency . ' ' . number_format((float)$rawGdp, 2, '.', ' '); // Форматируем с 2 знаками после запятой
+    }
+}
+
+$administrativeDivisions = 'Информация отсутствует';
+if (isset($claims['P150']) && !empty($claims['P150'])) {
+    $divisionItems = [];
+    foreach ($claims['P150'] as $divisionClaim) {
+        if (isset($divisionClaim['mainsnak']['datavalue']['value']['id'])) {
+            $divisionQid = $divisionClaim['mainsnak']['datavalue']['value']['id'];
+
+            $divisionLabel = $divisionQid;
+            $divisionApiUrl = 'https://www.wikidata.org/w/api.php';
+            $divisionParams = [
+                'action' => 'wbgetentities',
+                'ids' => $divisionQid,
+                'format' => 'json',
+                'languages' => 'ru,en',
+                'props' => 'labels' // Запрашиваем только метки
+            ];
+            $divisionUrl = $divisionApiUrl . '?' . http_build_query($divisionParams);
+
+            $divCh = curl_init();
+            curl_setopt($divCh, CURLOPT_URL, $divisionUrl);
+            curl_setopt($divCh, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($divCh, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($divCh, CURLOPT_USERAGENT, 'MyWikipediaApp/0.1 (https://example.com/contact)');
+            $divResponse = curl_exec($divCh);
+            $divHttpCode = curl_getinfo($divCh, CURLINFO_HTTP_CODE);
+            curl_close($divCh);
+
+            if ($divHttpCode === 200) {
+                $divData = json_decode($divResponse, true);
+                if (isset($divData['entities'][$divisionQid]['labels']['ru']['value'])) {
+                    $divisionLabel = $divData['entities'][$divisionQid]['labels']['ru']['value'];
+                } elseif (isset($divData['entities'][$divisionQid]['labels']['en']['value'])) {
+                     $divisionLabel = $divData['entities'][$divisionQid]['labels']['en']['value'];
+                }
+            }
+
+            $divisionItems[] = $divisionLabel;
+        }
+    }
+    if (!empty($divisionItems)) {
+        $displayCount = 10;
+        $truncatedDivisions = array_slice($divisionItems, 0, $displayCount);
+        $administrativeDivisions = implode(', ', $truncatedDivisions);
+        if (count($divisionItems) > $displayCount) {
+            $administrativeDivisions .= " и ещё " . (count($divisionItems) - $displayCount);
+        }
+    }
+}
+
+$headOfState = 'Не указан';
+if (isset($claims['P6']) && !empty($claims['P6'])) {
+    $headClaim = $claims['P6'][0];
+    if (isset($headClaim['mainsnak']['datavalue']['value']['id'])) {
+        $headQid = $headClaim['mainsnak']['datavalue']['value']['id'];
+
+        $headLabel = $headQid;
+        $headApiUrl = 'https://www.wikidata.org/w/api.php';
+        $headParams = [
+            'action' => 'wbgetentities',
+            'ids' => $headQid,
+            'format' => 'json',
+            'languages' => 'ru,en',
+            'props' => 'labels'
+        ];
+        $headUrl = $headApiUrl . '?' . http_build_query($headParams);
+
+        $headCh = curl_init();
+        curl_setopt($headCh, CURLOPT_URL, $headUrl);
+        curl_setopt($headCh, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($headCh, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($headCh, CURLOPT_USERAGENT, 'MyWikipediaApp/0.1 (https://example.com/contact)');
+        $headResponse = curl_exec($headCh);
+        $headHttpCode = curl_getinfo($headCh, CURLINFO_HTTP_CODE);
+        curl_close($headCh);
+
+        if ($headHttpCode === 200) {
+            $headData = json_decode($headResponse, true);
+            if (isset($headData['entities'][$headQid]['labels']['ru']['value'])) {
+                $headLabel = $headData['entities'][$headQid]['labels']['ru']['value'];
+            } elseif (isset($headData['entities'][$headQid]['labels']['en']['value'])) {
+                 $headLabel = $headData['entities'][$headQid]['labels']['en']['value'];
+            }
+        }
+        $headOfState = $headLabel;
+    }
+}
+
+$headOfGovernment = 'Не указан';
+if (isset($claims['P691']) && !empty($claims['P691'])) {
+    $govHeadClaim = $claims['P691'][0]; // Берём первое значение
+    if (isset($govHeadClaim['mainsnak']['datavalue']['value']['id'])) {
+        $govHeadQid = $govHeadClaim['mainsnak']['datavalue']['value']['id'];
+
+        $govHeadLabel = $govHeadQid;
+        $govHeadApiUrl = 'https://www.wikidata.org/w/api.php';
+        $govHeadParams = [
+            'action' => 'wbgetentities',
+            'ids' => $govHeadQid,
+            'format' => 'json',
+            'languages' => 'ru,en',
+            'props' => 'labels'
+        ];
+        $govHeadUrl = $govHeadApiUrl . '?' . http_build_query($govHeadParams);
+
+        $govHeadCh = curl_init();
+        curl_setopt($govHeadCh, CURLOPT_URL, $govHeadUrl);
+        curl_setopt($govHeadCh, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($govHeadCh, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($govHeadCh, CURLOPT_USERAGENT, 'MyWikipediaApp/0.1 (https://example.com/contact)');
+        $govHeadResponse = curl_exec($govHeadCh);
+        $govHeadHttpCode = curl_getinfo($govHeadCh, CURLINFO_HTTP_CODE);
+        curl_close($govHeadCh);
+
+        if ($govHeadHttpCode === 200) {
+            $govHeadData = json_decode($govHeadResponse, true);
+            if (isset($govHeadData['entities'][$govHeadQid]['labels']['ru']['value'])) {
+                $govHeadLabel = $govHeadData['entities'][$govHeadQid]['labels']['ru']['value'];
+            } elseif (isset($govHeadData['entities'][$govHeadQid]['labels']['en']['value'])) {
+                 $govHeadLabel = $govHeadData['entities'][$govHeadQid]['labels']['en']['value'];
+            }
+        }
+        $headOfGovernment = $govHeadLabel;
+    }
+}
+
+echo "<a href='index.php'>← Назад к списку стран</a>";
+echo "<h1>Детали: $label ($qid)</h1>";
 echo "<p><strong>Описание:</strong> $description</p>";
 echo "<p><strong>Население:</strong> $population" . ($populationDate ? " (по состоянию на $populationDate)" : "") . "</p>";
-echo "<p><strong>Столица:</strong> $capitalLabel</p>";
+echo "<p><strong>Площадь:</strong> $area</p>";
+echo "<p><strong>Номинальный ВВП на душу населения:</strong> $gdpPerCapita</p>";
+echo "<p><strong>Административное деление (регионы, штаты и т.д.):</strong> $administrativeDivisions</p>";
+echo "<p><strong>Глава государства:</strong> $headOfState</p>";
+echo "<p><strong>Глава правительства:</strong> $headOfGovernment</p>";
+
 ?>
 </main>
 
