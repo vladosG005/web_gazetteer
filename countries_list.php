@@ -113,7 +113,6 @@ foreach ($uniqueCountries as $country) {
 }
 echo "</ul>";
 
-}
 
   ?>
   </main>
