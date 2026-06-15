@@ -11,7 +11,7 @@
             <h1>🌍 NetGazetteer</h1>
             <nav>
                 <ul>
-                    <li><a href="#home">Главная</a></li>
+                    <li><a href="index.html">Главная</a></li>
                     <li><a href="#countries">Страны</a></li>
                     <li><a href="#about">О проекте</a></li>
                 </ul>
@@ -25,8 +25,12 @@ function fetchCountryIdsFromWikidata() {
     $sparqlEndpoint = 'https://query.wikidata.org/sparql';
     $query = '
         SELECT ?country ?countryLabel WHERE {
-          ?country wdt:P31 wd:Q6256. # ?country instance of country (Q6256)
+          ?country wdt:P31 wd:Q6256.
           MINUS { ?country wdt:P31 wd:Q3024240. }
+           OPTIONAL { ?country wdt:P1082 ?population. }
+            OPTIONAL { 
+                ?country wdt:P36 ?capital.
+            }
           SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
         }
         ORDER BY ?countryLabel
@@ -44,9 +48,9 @@ function fetchCountryIdsFromWikidata() {
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_USERAGENT => 'MyWikipediaApp/0.1 (https://example.com/contact)', // Важно!
+        CURLOPT_USERAGENT => 'MyWikipediaApp/0.1 (https://example.com/contact)',
         CURLOPT_HTTPHEADER => [
-            'Accept: application/sparql-results+json' // Указываем ожидаемый тип контента
+            'Accept: application/sparql-results+json'
         ]
     ]);
 
@@ -84,10 +88,11 @@ function fetchCountryIdsFromWikidata() {
 
 try {
     $allCountries = fetchCountryIdsFromWikidata();
-
+echo '<pre>';
     foreach ($allCountries as $index => $country) {
-            echo "{$country['qid']}, {$country['label']}\n";
+            echo "{$country['qid']}, {$country['label'], $country['capital']}\n";
     }
+echo '</pre>';
 }
 catch (Exception $e) {
     echo "Произошла ошибка: " . $e->getMessage() . "\n";
