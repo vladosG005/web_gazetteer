@@ -14,3 +14,4 @@ jobs:
           server: ${{ secrets.SERVER_IP }}
           remote_path: '/home/f1176550/domains/net-gazetteer.ru/public_html/'
           sftpArgs: '-o ConnectTimeout=5'
+          password: ${{ secrets.FTP_PASSWORD }}
