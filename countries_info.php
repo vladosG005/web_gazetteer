@@ -5,7 +5,7 @@ function fetchCountryIdsFromWikidata() {
     $query = '
         SELECT ?country ?countryLabel WHERE {
           ?country wdt:P31 wd:Q6256. # ?country instance of country (Q6256)
-          SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "ru". }
         }
         ORDER BY ?countryLabel
     ';
