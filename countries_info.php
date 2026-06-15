@@ -25,7 +25,8 @@ function fetchCountryIdsFromWikidata() {
     $sparqlEndpoint = 'https://query.wikidata.org/sparql';
     $query = '
         SELECT ?country ?countryLabel ?population ?capital ?capitalLabel WHERE {
-          ?country wdt:P31 wd:Q6256.
+          ?country wdt:P31 wd:Q6256;
+                   wdt:P31 wd:Q3624078.
           MINUS { ?country wdt:P31 wd:Q3024240. }
            OPTIONAL { ?country wdt:P1082 ?population. }
             OPTIONAL { 
@@ -93,7 +94,7 @@ try {
 echo '<pre>';
     foreach ($allCountries as $index => $country) {
         if ($country['qid'] != $country['label']) {
-            echo "{$country['label']}, {$country['capital']}\n";
+            echo "{$country['qid']}, {$country['label']}, {$country['capital']}, {$country['population']}\n";
         }
     }
 echo '</pre>';
