@@ -1,3 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+ <head>
+  <meta charset="UTF-8">
+  <title>Веб-справочник по географии</title>
+  <link rel="stylesheet" href="style.css">
+ </head>
+ <body>
+    <header>
+        <div class="header-content">
+            <h1>🌍 NetGazetteer</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="countries_list.php">Страны</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
 <?php
 
 $qid = $_GET['country_qid'] ?? null;
@@ -101,3 +121,13 @@ echo "<h1>Детали: $label ($qid)</h1>";
 echo "<p><strong>Описание:</strong> $description</p>";
 echo "<p><strong>Население:</strong> $population" . ($populationDate ? " (по состоянию на $populationDate)" : "") . "</p>";
 echo "<p><strong>Столица:</strong> $capitalLabel</p>";
+?>
+</main>
+
+  <footer>
+        <div class="footer-content">
+            <p>Данные предоставлены из Wikidata.</p>
+        </div>
+    </footer>
+ </body>
+</html>

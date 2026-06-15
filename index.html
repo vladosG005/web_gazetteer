@@ -12,8 +12,7 @@
             <nav>
                 <ul>
                     <li><a href="index.html">Главная</a></li>
-                    <li><a href="#countries">Страны</a></li>
-                    <li><a href="#about">О проекте</a></li>
+                    <li><a href="countries_list.php">Страны</a></li>
                 </ul>
             </nav>
         </div>
