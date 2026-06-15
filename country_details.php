@@ -70,27 +70,52 @@ $claims = $entity['claims'];
 $population = 'Не указано';
 $populationDate = '';
 if (isset($claims['P1082']) && !empty($claims['P1082'])) {
-    $popClaim = $claims['P1082'][0];
-    if (isset($popClaim['mainsnak']['datavalue']['value']['amount'])) {
-        $population = number_format((int)ltrim($popClaim['mainsnak']['datavalue']['value']['amount'], '+'), 0, '.', ' ');
-        foreach ($popClaim['qualifiers']['P585'] ?? [] as $qualifier) {
-            if ($qualifier['datavalue']['type'] === 'time') {
-                $dateStr = $qualifier['datavalue']['value']['time'];
-                $year = substr($dateStr, 1, 4);
-                $month = substr($dateStr, 6, 2);
-                $day = substr($dateStr, 9, 2);
+    $latestDate = null;
+    $latestPopValue = null;
 
-                if ($month === '00' && $day === '00') {
-                    $populationDate = $year;
+    foreach ($claims['P1082'] as $claim) {
+        $currentDate = null;
+        if (isset($claim['qualifiers']['P585']) && !empty($claim['qualifiers']['P585'])) {
+            $qualifierSnak = $claim['qualifiers']['P585'][0]; // Берём первый квалификатор даты
+            if ($qualifierSnak['datatype'] === 'time' && isset($qualifierSnak['datavalue']['value']['time'])) {
+                $timeString = $qualifierSnak['datavalue']['value']['time']; // e.g., "+2020-01-01T00:00:00Z"
+                $year = (int)substr($timeString, 1, 4);
+                $month = (int)substr($timeString, 6, 2);
+                $day = (int)substr($timeString, 9, 2);
+                if ($month === 0 && $day === 0) {
+                    $currentDate = mktime(0, 0, 0, 1, 1, $year); // 1 января года
+                } elseif ($day === 0) {
+                    $currentDate = mktime(0, 0, 0, $month, 1, $year); // 1-е число месяца
+                } else {
+                    $currentDate = mktime(0, 0, 0, $month, $day, $year);
                 }
-                elseif ($day === '00') {
-                    $populationDate = "$year-$month";
-                }
-                else {
-                    $populationDate = "$year-$month-$day";
-                }
-                break;
             }
+        } else {
+            continue;
+        }
+        if ($currentDate !== null && ($latestDate === null || $currentDate > $latestDate)) {
+            $latestDate = $currentDate;
+            if (isset($claim['mainsnak']['datavalue']['value']['amount'])) {
+                $latestPopValue = (int)ltrim($claim['mainsnak']['datavalue']['value']['amount'], '+');
+            }
+        }
+    }
+
+    if ($latestPopValue !== null) {
+        $population = number_format($latestPopValue, 0, '.', ' ');
+        if ($latestDate !== null) {
+            $originalTimeString = $claims['P1082'][array_search(['mainsnak' => ['datavalue' => ['value' => ['amount' => (string)(ltrim($latestPopValue, '+'))]]], ...], $claims['P1082'])]['qualifiers']['P585'][0]['datavalue']['value']['time'];
+             $year = (int)substr($originalTimeString, 1, 4);
+             $month = (int)substr($originalTimeString, 6, 2);
+             $day = (int)substr($originalTimeString, 9, 2);
+
+             if ($month === 0 && $day === 0) {
+                 $populationDate = (string)$year;
+             } elseif ($day === 0) {
+                 $populationDate = sprintf("%04d-%02d", $year, $month);
+             } else {
+                 $populationDate = sprintf("%04d-%02d-%02d", $year, $month, $day);
+             }
         }
     }
 }
