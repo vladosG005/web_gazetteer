@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="style.css">
  </head>
  <body>
+    <img src="web_gazetteer_logo.png" alt="Логотип"></img>
   <?php
 
 function fetchCountryIdsFromWikidata() {
@@ -71,7 +72,6 @@ function fetchCountryIdsFromWikidata() {
 try {
     $allCountries = fetchCountryIdsFromWikidata();
 
-    echo "Найдено " . count($allCountries) . " стран:\n";
     foreach ($allCountries as $index => $country) {
             echo "{$country['qid']}, {$country['label']}\n";
     }
