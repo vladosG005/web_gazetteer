@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Веб-справочник по географии</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="/web_gazetteer_logo.png">
  </head>
  <body>
     <header>
@@ -75,7 +76,7 @@ if (isset($claims['P1082']) && !empty($claims['P1082'])) {
         foreach ($popClaim['qualifiers']['P585'] ?? [] as $qualifier) {
             if ($qualifier['datavalue']['type'] === 'time') {
                 $dateStr = $qualifier['datavalue']['value']['time'];
-                $populationDate = substr($dateStr, 0, 11); // YYYY-MM-DD
+                $populationDate = substr($dateStr, 1, 11);
                 break;
             }
         }
@@ -84,7 +85,7 @@ if (isset($claims['P1082']) && !empty($claims['P1082'])) {
 
 $capitalLabel = 'Не указана';
 if (isset($claims['P36']) && !empty($claims['P36'])) {
-    $capClaim = $claims['P36'][0]; // Берём первую столицу
+    $capClaim = $claims['P36'][0];
     $capEntityId = $capClaim['mainsnak']['datavalue']['value']['id'];
 
     $capApiUrl = 'https://www.wikidata.org/w/api.php';
@@ -116,7 +117,7 @@ if (isset($claims['P36']) && !empty($claims['P36'])) {
     }
 }
 
-echo "<a href='index.php'>← Назад к списку стран</a>";
+echo "<a href='countries_list.php'>← Назад к списку стран</a>";
 echo "<h1>Детали: $label ($qid)</h1>";
 echo "<p><strong>Описание:</strong> $description</p>";
 echo "<p><strong>Население:</strong> $population" . ($populationDate ? " (по состоянию на $populationDate)" : "") . "</p>";

@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Веб-справочник по географии</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="/web_gazetteer_logo.png">
  </head>
  <body>
     <header>
