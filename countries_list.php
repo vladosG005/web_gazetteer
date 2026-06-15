@@ -89,18 +89,30 @@ function fetchCountryIdsFromWikidata() {
     return $countries;
 }
 
-try {
-    $allCountries = fetchCountryIdsFromWikidata();
-echo '<pre>';
-    foreach ($allCountries as $index => $country) {
-        if ($country['qid'] != $country['label']) {
-            echo "{$country['qid']}, {$country['label']}, {$country['capital']}, {$country['population']}\n";
-        }
+    $rawCountries = fetchCountryIdsFromWikidata();
+
+    $uniqueCountries = [];
+$seenQids = [];
+
+foreach ($rawCountries as $country) {
+    $qid = $country['qid'];
+    if (!in_array($qid, $seenQids)) {
+        $uniqueCountries[] = $country;
+        $seenQids[] = $qid;
     }
-echo '</pre>';
 }
-catch (Exception $e) {
-    echo "Произошла ошибка: " . $e->getMessage() . "\n";
+
+echo "<h2>Список стран:</h2>";
+echo "<ul>";
+foreach ($uniqueCountries as $country) {
+    $label = htmlspecialchars($country['label'], ENT_QUOTES, 'UTF-8');
+    $qid = htmlspecialchars($country['qid'], ENT_QUOTES, 'UTF-8');
+
+    $link = "country_details.php?country_qid=" . urlencode($qid);
+    echo "<li><a href='$link'>$label</a> ($qid)</li>";
+}
+echo "</ul>";
+
 }
 
   ?>
