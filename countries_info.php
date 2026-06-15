@@ -24,7 +24,7 @@
 function fetchCountryIdsFromWikidata() {
     $sparqlEndpoint = 'https://query.wikidata.org/sparql';
     $query = '
-        SELECT ?country ?countryLabel WHERE {
+        SELECT ?country ?countryLabel ?population ?capital ?capitalLabel WHERE {
           ?country wdt:P31 wd:Q6256.
           MINUS { ?country wdt:P31 wd:Q3024240. }
            OPTIONAL { ?country wdt:P1082 ?population. }
