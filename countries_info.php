@@ -80,7 +80,9 @@ function fetchCountryIdsFromWikidata() {
     foreach ($data['results']['bindings'] as $binding) {
         $qid = str_replace('http://www.wikidata.org/entity/', '', $binding['country']['value']);
         $label = $binding['countryLabel']['value'] ?? '';
-        $countries[] = ['qid' => $qid, 'label' => $label];
+        $capital = $binding['capitalLabel']['value'] ?? '';
+        $population = $binding['population']['value'] ?? '';
+        $countries[] = ['qid' => $qid, 'label' => $label, 'capital' => $capital, 'population' => $population];
     }
 
     return $countries;
@@ -90,7 +92,9 @@ try {
     $allCountries = fetchCountryIdsFromWikidata();
 echo '<pre>';
     foreach ($allCountries as $index => $country) {
-            echo "{$country['qid']}, {$country['label']}, {$country['capital']}\n";
+        if ($country['qid'] != $country['label']) {
+            echo "{$country['label']}, {$country['capital']}\n";
+        }
     }
 echo '</pre>';
 }
